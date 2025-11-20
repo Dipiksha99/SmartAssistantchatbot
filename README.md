@@ -1,3 +1,5 @@
+SGSU Smart Assistant ChatBot
+
 A Smart Assistant Chatbot is an intelligent computer program designed to interact with users just like a human assistant.
 These chatbots use AI technology to understand users' queries, answer them, and make their work easier.
 
