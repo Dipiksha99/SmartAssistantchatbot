@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SGSU ChatBot</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f2f2f2;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  .date-top {
+    padding: 8px 0 6px 0;
+    font-size: 16px;
+    color: #7D55C7;
+    text-align: center;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+  }
+  .chat-container {
+    width: 350px;
+    height: 550px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+  .top-bar {
+    background: #7D55C7;
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    position: relative;
+  }
+  .logo {
+    height: 40px;
+    object-fit: contain;
+    margin-right: 12px;
+  }
+  .top-bar-title {
+    font-weight: bold;
+    font-size: 20px;
+    flex-grow: 1;
+  }
+  .menu-btn {
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+  }
+  .menu-btn div {
+    height: 4px;
+    background: white;
+    border-radius: 2px;
+  }
+  .dropdown-menu {
+    position: absolute;
+    top: 52px;
+    right: 16px;
+    width: 140px;
+    background: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    border-radius: 8px;
+    display: none;
+    flex-direction: column;
+    z-index: 10;
+  }
+  .dropdown-menu.visible {
+    display: flex;
+  }
+  .dropdown-item {
+    padding: 10px 14px;
+    font-size: 14px;
+    color: #7D55C7;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid #eee;
+    user-select: none;
+  }
+  .dropdown-item:last-child {
+    border-bottom: none;
+  }
+  .dropdown-item:hover {
+    background: #7D55C7;
+    color: white;
+  }
+  .dropdown-item svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+  }
+  .chat-box {
+    flex: 1;
+    background: #f7f4ff;
+    padding: 20px 12px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .msg {
+    max-width: 75%;
+    padding: 12px 18px;
+    margin: 8px 0;
+    border-radius: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.09);
+    font-size: 15px;
+    line-height: 1.5;
+    word-break: break-word;
+    display: flex;
+    align-items: center;
+  }
+  .bot {
+    background: #eae6fc;
+    color: #222;
+    border-bottom-left-radius: 0;
+    justify-content: flex-start;
+  }
+  .user {
+    background: #7D55C7;
+    color: white;
+    border-bottom-right-radius: 0;
+    justify-content: flex-end;
+  }
+  .bot-avatar, .user-avatar {
+    height: 32px;
+    width: 32px;
+    border-radius: 50%;
+  }
+  .bot-avatar {
+    margin-right: 8px;
+    border: 2px solid #7D55C7;
+  }
+  .user-avatar {
+    margin-left: 8px;
+    object-fit: cover;
+    border: 1.8px solid #7D55C7;
+  }
+  .buttons-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 8px 0;
+  }
+  .chat-btn {
+    background: white;
+    color: #7D55C7;
+    border: 2px solid #7D55C7;
+    border-radius: 26px;
+    padding: 7px 22px;
+    font-size: 15px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  .chat-btn:hover, .chat-btn.selected {
+    background: #7D55C7;
+    color: white;
+  }
+  .input-area {
+    display: flex;
+    padding: 12px 13px;
+    background: white;
+    border-top: 1.5px solid #ececec;
+    gap: 8px;
+  }
+  input[type="text"] {
+    flex: 1;
+    padding: 10px 13px;
+    font-size: 16px;
+    border-radius: 24px;
+    outline: none;
+    border: 1.5px solid #cfaeea;
+    transition: border-color 0.3s ease;
+  }
+  input[type="text"]:focus {
+    border-color: #7D55C7;
+  }
+  button {
+    background: #7D55C7;
+    border: none;
+    color: white;
+    font-size: 16px;
+    border-radius: 24px;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  button:hover {
+    background: #512c7d;
+  }
+  .typing-indicator {
+    font-style: italic;
+    font-size: 13px;
+    color: #666;
+    margin: 2px 0 6px 42px;
+  }
+</style>
+</head>
+<body>
+  <div class="date-top">
+    Thursday, November 20, 2025
+  </div>
+  <div class="chat-container">
+    <div class="top-bar">
+      <img src="https://tse1.mm.bing.net/th/id/OIP.WR686ZE4vgL-_2qv9ATuJQAAAA?rs=1&pid=ImgDetMain&o=7&rm=3" alt="SGSU Logo" class="logo" />
+      <div class="top-bar-title">SGSU ChatBot</div>
+      <div class="menu-btn" id="menuBtn" title="Menu" aria-label="Menu" role="button" tabindex="0">
+        <div></div><div></div><div></div>
+      </div>
+      <div class="dropdown-menu" id="dropdownMenu" role="menu" aria-hidden="true">
+        <div class="dropdown-item" id="clearChat" role="menuitem" tabindex="0">
+          <svg viewBox="0 0 24 24"><path d="M3 6h18v2H3zM6 10h12v2H6zM10 14h4v2h-4z"/></svg>
+          Clear Chat
+        </div>
+        <div class="dropdown-item" id="restartBot" role="menuitem" tabindex="0">
+          <svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.1-.36 2.11-.97 2.92l1.46 1.46C19.44 15.51 20 13.82 20 12c0-4.42-3.58-8-8-8z"/></svg>
+          Restart Bot
+        </div>
+        <div class="dropdown-item" id="botInfo" role="menuitem" tabindex="0">
+          <svg viewBox="0 0 24 24"><path d="M11 17h2v-6h-2v6zm0-8h2V7h-2v2zm1-7C6.48 2 2 6.48 2 12c0 5.52 4.48 10 10 10s10-4.48 10-10c0-5.52-4.48-10-10-10zm0 18c-4.41 0-8-3.59-8-8a7.96 7.96 0 017-7.95V6c-3.31 0-6 2.7-6 6s2.69 6 6 6 6-2.69 6-6v-.01z"/></svg>
+          Bot Info
+        </div>
+      </div>
+    </div>
+    <div class="chat-box" id="chatBox"></div>
+    <div class="input-area">
+      <input type="text" id="userInput" placeholder="Type your message..." autocomplete="off" />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+<script>
+  const userAvatarUrl = "https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/woman-user-circle-icon.png";
+  const courses = [
+    {name:"BTech", duration:"4 Years", fees:"₹40,000 - 80,000", eligibility:"Class 12 pass"},
+    {name:"BCA", duration:"3 Years", fees:"₹25,000 - 35,000", eligibility:"Class 12 pass"},
+    {name:"BSc", duration:"3 Years", fees:"₹20,000 - 2,00,000", eligibility:"Class 12 pass"},
+    {name:"BBA", duration:"3 Years", fees:"₹25,000 - 50,000", eligibility:"Class 12 pass"},
+    {name:"BCom", duration:"3 Years", fees:"₹20,000", eligibility:"Class 12 pass"},
+    {name:"BA", duration:"3 Years", fees:"₹12,000 - 35,000", eligibility:"Class 12 pass"},
+    {name:"BLib", duration:"1 Year", fees:"₹15,000", eligibility:"Graduation pass"},
+    {name:"B.Ed", duration:"2 Years", fees:"₹35,000", eligibility:"Graduation pass"},
+    {name:"BFA", duration:"4 Years", fees:"₹30,000", eligibility:"Class 12 pass"},
+    {name:"BPES", duration:"3 Years", fees:"₹25,000", eligibility:"Class 12 pass"},
+    {name:"MCA", duration:"2 Years", fees:"₹50,000", eligibility:"Graduation pass"},
+    {name:"MTech", duration:"2 Years", fees:"₹50,000", eligibility:"Graduation pass"},
+    {name:"MSc", duration:"2 Years", fees:"₹20,000 - 75,000", eligibility:"Graduation pass"},
+    {name:"PGDCA", duration:"1 Year", fees:"₹12,000", eligibility:"Graduation pass"},
+    {name:"MBA", duration:"2 Years", fees:"₹50,000", eligibility:"Graduation pass"},
+    {name:"MCom", duration:"2 Years", fees:"₹25,000", eligibility:"Graduation pass"},
+    {name:"MA", duration:"2 Years", fees:"₹16,000 - 35,000", eligibility:"Graduation pass"},
+    {name:"MLib", duration:"1 Year", fees:"₹20,000", eligibility:"BLib pass"},
+    {name:"MFA", duration:"2 Years", fees:"₹25,000", eligibility:"BFA pass"},
+    {name:"MPES", duration:"2 Years", fees:"₹30,000", eligibility:"BPES/BPEd pass"},
+    {name:"Diploma Courses", duration:"1-3 Years", fees:"₹10,000 - ₹60,000", eligibility:"Class 10 pass"},
+    {name:"PG Diploma", duration:"1 Year", fees:"₹35,000", eligibility:"Graduation pass"},
+  ];
+  function userAvatarHtml() {
+    return `<img src="${userAvatarUrl}" alt="User" class="user-avatar" />`;
+  }
+  function botAvatarHtml() {
+    return `<span class="bot-avatar"><img src="https://cdn-icons-png.flaticon.com/512/4712/4712027.png" style="width:22px;height:22px;"/></span>`;
+  }
+  function listAllCoursesButtons(){
+    let html = `<div class='buttons-row'>`;
+    courses.forEach(c=>{
+      html += `<button class='chat-btn' onclick='pickOption("${c.name}")'>${c.name}</button>`;
+    });
+    html += '</div>';
+    return html;
+  }
+  function courseInfo(name){
+    const c = courses.find(x => x.name.toLowerCase() === name.toLowerCase());
+    if(!c) return null;
+    return `<b>${c.name}</b><br/>Duration: ${c.duration}<br/>Fees: ${c.fees}<br/>Eligibility: ${c.eligibility}`;
+  }
+  function collegeInfoAnswer(msg) {
+    msg = msg.toLowerCase();
+    if(msg.includes("about university") || msg.includes("about sgsu") || msg.includes("about college")){
+      return "SCOPE Global Skills University (SGSU), Bhopal is a premier skill university offering UG, PG and diploma programs focused on industry readiness, practical learning, and skill development across Engineering, IT, Business, Science, Arts and more.";
+    }
+    if(msg.includes("campus") || msg.includes("facility") || msg.includes("infrastructure")){
+      return "SGSU campus includes modern labs, libraries, hostels, sports facilities, smart classrooms and more to provide a well-rounded learning environment.";
+    }
+    if(msg.includes("admission") || msg.includes("apply") || msg.includes("eligibility")){
+      return "Admissions are merit-based. Apply online at sgsuniversity.ac.in after checking eligibility for your chosen course.";
+    }
+    if(msg.includes("placement") || msg.includes("career") || msg.includes("jobs")){
+      return "SGSU supports placements through industry partnerships and institutes training to boost career opportunities.";
+    }
+    // Separated exam dates
+    if(msg.includes("exam") || msg.includes("exam dates") || msg.includes("schedule")){
+      return `<b>Upcoming Exam Dates:</b><br>
+      MST: <b>24th November</b><br>
+      Pre-Exam: <b>15th December</b><br>
+      Final Exam: <b>Starting January</b>`;
+    }
+    if(msg.includes("contact") || msg.includes("phone") || msg.includes("email") || msg.includes("website")){
+      return "Visit the official SGSU website at sgsuniversity.ac.in or find contact details on the same site.";
+    }
+    if(msg.includes("scholarship") || msg.includes("financial aid")){
+      return "SGSU offers various scholarships based on merit and need. Check the scholarships section on the official website for details.";
+    }
+    if(msg.includes("event") || msg.includes("workshop") || msg.includes("seminar")){
+      return "SGSU has regular events, workshops and seminars. Stay updated via the events section on the SGSU website.";
+    }
+    return null;
+  }
+  function botReply(msg) {
+    msg = msg.toLowerCase().trim();
+    if(msg === "" || msg === "hi" || msg === "hello"){
+      return {text: "Hello! How can I help? Type 'courses' to see the course list or ask about SGSU info."};
+    }
+    const infoReply = collegeInfoAnswer(msg);
+    if(infoReply){
+      return {text: infoReply};
+    }
+    if(msg.includes("course list") || msg === "courses" || msg === "subjects" ){
+      return {text: "Here is the list of SGSU courses. Click any button for details.", html: listAllCoursesButtons()};
+    }
+    for(let c of courses){
+      if(msg.includes(c.name.toLowerCase())){
+        if(msg.includes("fee")){
+          return {text: `<b>${c.name} Fee:</b> ${c.fees}`};
+        }
+        if(msg.includes("eligibility")){
+          return {text: `<b>${c.name} Eligibility:</b> ${c.eligibility}`};
+        }
+        if(msg.includes("duration")){
+          return {text: `<b>${c.name} Duration:</b> ${c.duration}`};
+        }
+        return {text: courseInfo(c.name)};
+      }
+    }
+    if(msg.includes("admission")){
+      return {text:"Admissions are open! Type a course name for fees or eligibility info."};
+    }
+    if(msg.includes("fee") || msg.includes("fees")){
+      return {text:"Please specify course name to get fee info. E.g., 'MBA fee'."};
+    }
+    return {text:"Sorry, I didn't understand. Type 'courses' to see course list or ask about SGSU."};
+  }
+  function addUserMessage(msg){
+    const chatBox = document.getElementById("chatBox");
+    chatBox.innerHTML += `
+      <div class="msg user" style="justify-content:flex-end; display:flex; align-items:center;">
+        <span>${msg}</span>
+        ${userAvatarHtml()}
+      </div>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+  function addBotMessage(msgObj){
+    const chatBox = document.getElementById("chatBox");
+    const existingTyping = document.querySelector(".typing-indicator");
+    if(existingTyping) existingTyping.remove();
+    let html = `
+      <div class="msg bot" style="justify-content:flex-start; display:flex; align-items:center;">
+        ${botAvatarHtml()}
+        <span class="msg-text" style="margin-left:8px;">${msgObj.text}${msgObj.html || ""}</span>
+      </div>`;
+    chatBox.innerHTML += html;
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+  function showTypingIndicator(){
+    const chatBox = document.getElementById("chatBox");
+    const typing = document.createElement("div");
+    typing.classList.add("typing-indicator");
+    typing.textContent = "Bot is typing...";
+    chatBox.appendChild(typing);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+  function pickOption(val){
+    addUserMessage(val);
+    showTypingIndicator();
+    setTimeout(()=>{
+      const reply = botReply(val);
+      addBotMessage(reply);
+    }, 800);
+  }
+  function sendMessage(){
+    const input = document.getElementById("userInput");
+    const message = input.value.trim();
+    if(message === "") return;
+    addUserMessage(message);
+    showTypingIndicator();
+    setTimeout(()=>{
+      const reply = botReply(message);
+      addBotMessage(reply);
+    }, 800);
+    input.value = "";
+    input.focus();
+  }
+  document.getElementById("userInput").addEventListener("keyup", function(e){
+    if(e.key === "Enter"){
+      sendMessage();
+    }
+  });
+  window.onload = function(){
+    addBotMessage({text:"Welcome to SGSU ChatBot! Type 'courses' to see course list or ask about the university."});
+    addBotMessage({text:"Here are some courses you can ask about:", html: listAllCoursesButtons()});
+  };
+  const menuBtn = document.getElementById("menuBtn");
+  const dropdownMenu = document.getElementById("dropdownMenu");
+  menuBtn.addEventListener("click", () => {
+    dropdownMenu.classList.toggle("visible");
+    dropdownMenu.setAttribute("aria-hidden", !dropdownMenu.classList.contains("visible"));
+  });
+  document.addEventListener("click", (e) => {
+    if (!menuBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+      dropdownMenu.classList.remove("visible");
+      dropdownMenu.setAttribute("aria-hidden", "true");
+    }
+  });
+  document.getElementById("clearChat").addEventListener("click", () => {
+    document.getElementById("chatBox").innerHTML = "";
+    dropdownMenu.classList.remove("visible");
+    dropdownMenu.setAttribute("aria-hidden", "true");
+  });
+  document.getElementById("restartBot").addEventListener("click", () => {
+    const chatBox = document.getElementById("chatBox");
+    chatBox.innerHTML = "";
+    dropdownMenu.classList.remove("visible");
+    dropdownMenu.setAttribute("aria-hidden", "true");
+    addBotMessage({text:"Session restarted. Welcome back to SGSU ChatBot! Type 'courses' to see course list or ask about the university."});
+    addBotMessage({text:"Here are some courses you can ask about:", html: listAllCoursesButtons()});
+  });
+  document.getElementById("botInfo").addEventListener("click", () => {
+    dropdownMenu.classList.remove("visible");
+    dropdownMenu.setAttribute("aria-hidden", "true");
+    alert("SGSU ChatBot v1.0\nDeveloped for SCOPE Global Skills University.\nHelps users with course info, university details, and admissions.");
+  });
+</script>
+</body>
+</html>
